@@ -192,7 +192,7 @@ float encoder_read_deg(void) {
 		break;
 
 	case ENCODER_MODE_AS5047P_SPI:
-		angle = ((float)cumulative_encoder_counts * 360.0) / 16384.0;  // A.G.
+		angle = ((float)cumulative_encoder_counts * 360.0) / (float)enc_counts;  // A.G.
     //angle = last_enc_angle;
 		break;
 
@@ -261,20 +261,20 @@ void encoder_tim_isr(void) {
 	pos &= 0x3FFF;
 
 	// Handle encoder rollover up or down.
-	if(last_encoder_counts < (16384 / 4) && pos > (3 * 16384 / 4))
+	if(last_encoder_counts < ((float)enc_counts / 4) && pos > (3 * (float)enc_counts / 4))
 	{
-		cumulative_encoder_counts -= 16384;
+		cumulative_encoder_counts -= (float)enc_counts;
 	} else
-	if(last_encoder_counts > (3 * 16384 / 4) && pos < (16384 / 4))
+	if(last_encoder_counts > (3 * (float)enc_counts / 4) && pos < ((float)enc_counts / 4))
 	{
-		cumulative_encoder_counts += 16384;
+		cumulative_encoder_counts += (float)enc_counts;
 	}
 
   // Now account for actual reading changes
 	cumulative_encoder_counts += (pos - last_encoder_counts);
 	last_encoder_counts = pos;
 
-	last_enc_angle = ((float)pos * 360.0) / 16384.0;
+	last_enc_angle = ((float)pos * 360.0) / (float)enc_counts;
 }
 
 /**
