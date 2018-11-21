@@ -43,6 +43,7 @@ void mc_interface_set_brake_current(float current);
 void mc_interface_set_current_rel(float val);
 void mc_interface_set_brake_current_rel(float val);
 void mc_interface_set_handbrake(float current);
+void mc_interface_set_handbrake_rel(float val);
 void mc_interface_brake_now(void);
 void mc_interface_release_motor(void);
 float mc_interface_get_duty_cycle_set(void);
@@ -72,8 +73,6 @@ float mc_interface_get_last_sample_adc_isr_duration(void);
 void mc_interface_sample_print_data(debug_sampling_mode mode, uint16_t len, uint8_t decimation);
 float mc_interface_temp_fet_filtered(void);
 float mc_interface_temp_motor_filtered(void);
-
-void update_override_limits(volatile mc_configuration *conf);
 
 // MC implementation functions
 void mc_interface_fault_stop(mc_fault_code fault);
