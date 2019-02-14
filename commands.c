@@ -22,7 +22,6 @@
 #include "hal.h"
 #include "mc_interface.h"
 #include "stm32f4xx_conf.h"
-#include "servo.h"
 #include "servo_simple.h"
 #include "buffer.h"
 #include "terminal.h"
@@ -181,6 +180,8 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 		buffer_append_int32(send_buffer, mc_interface_get_tachometer_value(false), &ind);
 		buffer_append_int32(send_buffer, mc_interface_get_tachometer_abs_value(false), &ind);
 		send_buffer[ind++] = mc_interface_get_fault();
+		buffer_append_float32(send_buffer, mc_interface_get_pid_pos_now(), 1e6, &ind);
+		send_buffer[ind++] = app_get_configuration()->controller_id;
 		commands_send_packet(send_buffer, ind);
 		break;
 
@@ -268,11 +269,7 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 	case COMM_SET_SERVO_POS:
 #if SERVO_OUT_ENABLE
 		ind = 0;
-#if SERVO_OUT_SIMPLE
 		servo_simple_set_output(buffer_get_float16(data, 1000.0, &ind));
-#else
-		servos[0].pos = (int16_t)(buffer_get_float16(data, 1000.0, &ind) * 255.0);
-#endif
 #endif
 		break;
 
@@ -359,16 +356,19 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 		mcconf.foc_sat_comp = buffer_get_float32_auto(data, &ind);
 		mcconf.foc_temp_comp = data[ind++];
 		mcconf.foc_temp_comp_base_temp = buffer_get_float32_auto(data, &ind);
+		mcconf.foc_current_filter_const = buffer_get_float32_auto(data, &ind);
 
 		mcconf.s_pid_kp = buffer_get_float32_auto(data, &ind);
 		mcconf.s_pid_ki = buffer_get_float32_auto(data, &ind);
 		mcconf.s_pid_kd = buffer_get_float32_auto(data, &ind);
+		mcconf.s_pid_kd_filter = buffer_get_float32_auto(data, &ind);
 		mcconf.s_pid_min_erpm = buffer_get_float32_auto(data, &ind);
 		mcconf.s_pid_allow_braking = data[ind++];
 
 		mcconf.p_pid_kp = buffer_get_float32_auto(data, &ind);
 		mcconf.p_pid_ki = buffer_get_float32_auto(data, &ind);
 		mcconf.p_pid_kd = buffer_get_float32_auto(data, &ind);
+		mcconf.p_pid_kd_filter = buffer_get_float32_auto(data, &ind);
 		mcconf.p_pid_ang_div = buffer_get_float32_auto(data, &ind);
 
 		mcconf.cc_startup_boost_duty = buffer_get_float32_auto(data, &ind);
@@ -388,6 +388,7 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 		mcconf.m_bldc_f_sw_max = buffer_get_float32_auto(data, &ind);
 		mcconf.m_dc_f_sw = buffer_get_float32_auto(data, &ind);
 		mcconf.m_ntc_motor_beta = buffer_get_float32_auto(data, &ind);
+		mcconf.m_out_aux_mode = data[ind++];
 
 		// Apply limits if they are defined
 #ifndef DISABLE_HW_LIMITS
@@ -514,16 +515,19 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 		buffer_append_float32_auto(send_buffer, mcconf.foc_sat_comp, &ind);
 		send_buffer[ind++] = mcconf.foc_temp_comp;
 		buffer_append_float32_auto(send_buffer, mcconf.foc_temp_comp_base_temp, &ind);
+		buffer_append_float32_auto(send_buffer, mcconf.foc_current_filter_const, &ind);
 
 		buffer_append_float32_auto(send_buffer, mcconf.s_pid_kp, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.s_pid_ki, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.s_pid_kd, &ind);
+		buffer_append_float32_auto(send_buffer, mcconf.s_pid_kd_filter, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.s_pid_min_erpm, &ind);
 		send_buffer[ind++] = mcconf.s_pid_allow_braking;
 
 		buffer_append_float32_auto(send_buffer, mcconf.p_pid_kp, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.p_pid_ki, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.p_pid_kd, &ind);
+		buffer_append_float32_auto(send_buffer, mcconf.p_pid_kd_filter, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.p_pid_ang_div, &ind);
 
 		buffer_append_float32_auto(send_buffer, mcconf.cc_startup_boost_duty, &ind);
@@ -543,6 +547,7 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 		buffer_append_float32_auto(send_buffer, mcconf.m_bldc_f_sw_max, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.m_dc_f_sw, &ind);
 		buffer_append_float32_auto(send_buffer, mcconf.m_ntc_motor_beta, &ind);
+		send_buffer[ind++] = mcconf.m_out_aux_mode;
 
 		commands_send_packet(send_buffer, ind);
 		break;

@@ -1,5 +1,5 @@
 /*
-	Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+	Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
 
 	This file is part of the VESC firmware.
 
@@ -22,7 +22,7 @@
 
 // Firmware version
 #define FW_VERSION_MAJOR		3
-#define FW_VERSION_MINOR		33
+#define FW_VERSION_MINOR		40
 
 #include "datatypes.h"
 
@@ -44,6 +44,9 @@
 // Benjamins first HW60 PCB with PB5 and PB6 swapped
 //#define HW60_VEDDER_FIRST_PCB
 
+// Benjamins first HW75_300 PCB with different LED pins and motor temp error
+//#define HW75_300_VEDDER_FIRST_PCB
+
 /*
  * Select only one hardware version
  */
@@ -51,7 +54,8 @@
 	!defined(HW_VERSION_48) && !defined(HW_VERSION_49) && !defined(HW_VERSION_410) && \
 	!defined(HW_VERSION_60) && !defined(HW_VERSION_R2) && !defined(HW_VERSION_VICTOR_R1A) && \
 	!defined(HW_VERSION_DAS_RS) && !defined(HW_VERSION_PALTA) && !defined(HW_VERSION_RH) && \
-	!defined(HW_VERSION_TP)
+	!defined(HW_VERSION_TP) && !defined(HW_VERSION_75_300) && !defined(HW_VERSION_MINI4) && \
+	!defined(HW_VERSION_DAS_MINI)
 //#define HW_VERSION_40
 //#define HW_VERSION_45
 //#define HW_VERSION_46 // Also for 4.7
@@ -65,6 +69,9 @@
 //#define HW_VERSION_PALTA
 //#define HW_VERSION_RH
 //#define HW_VERSION_TP
+//#define HW_VERSION_75_300
+//#define HW_VERSION_MINI4
+//#define HW_VERSION_DAS_MINI
 #endif
 
 /*
@@ -118,7 +125,6 @@
 #ifndef SERVO_OUT_ENABLE
 #define SERVO_OUT_ENABLE			0		// Enable servo output
 #endif
-#define SERVO_OUT_SIMPLE			1		// Use simple HW-based driver (recommended)
 #define SERVO_OUT_PULSE_MIN_US		1000	// Minimum pulse length in microseconds
 #define SERVO_OUT_PULSE_MAX_US		2000	// Maximum pulse length in microseconds
 #define SERVO_OUT_RATE_HZ			50		// Update rate in Hz

@@ -118,6 +118,9 @@
 #ifndef MCCONF_S_PID_KD
 #define MCCONF_S_PID_KD					0.0001	// Derivative gain
 #endif
+#ifndef MCCONF_S_PID_KD_FILTER
+#define MCCONF_S_PID_KD_FILTER			0.2	// Derivative filter
+#endif
 #ifndef MCCONF_S_PID_MIN_RPM
 #define MCCONF_S_PID_MIN_RPM			900.0	// Minimum allowed RPM
 #endif
@@ -134,6 +137,9 @@
 #endif
 #ifndef MCCONF_P_PID_KD
 #define MCCONF_P_PID_KD					0.0004	// Derivative gain
+#endif
+#ifndef MCCONF_P_PID_KD_FILTER
+#define MCCONF_P_PID_KD_FILTER			0.2		// Derivative filter
 #endif
 #ifndef MCCONF_P_PID_ANG_DIV
 #define MCCONF_P_PID_ANG_DIV			1.0		// Divide angle by this value
@@ -314,6 +320,9 @@
 #ifndef MCCONF_FOC_TEMP_COMP_BASE_TEMP
 #define MCCONF_FOC_TEMP_COMP_BASE_TEMP	25.0	// Motor temperature compensation base temperature
 #endif
+#ifndef MCCONF_FOC_CURRENT_FILTER_CONST
+#define MCCONF_FOC_CURRENT_FILTER_CONST	0.1		// Filter constant for the filtered currents
+#endif
 
 // Misc
 #ifndef MCCONF_M_FAULT_STOP_TIME
@@ -351,6 +360,9 @@
 #endif
 #ifndef MCCONF_M_NTC_MOTOR_BETA
 #define MCCONF_M_NTC_MOTOR_BETA			3380.0 // Beta value for motor termistor
+#endif
+#ifndef MCCONF_M_OUT_AUX_MODE
+#define MCCONF_M_OUT_AUX_MODE			OUT_AUX_MODE_OFF // Auxiliary output mode
 #endif
 
 #endif /* MCCONF_DEFAULT_H_ */
